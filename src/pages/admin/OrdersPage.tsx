@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import { ClipboardList } from 'lucide-react';
-import { Card, CardTitle, Badge, EmptyState, PageLoader } from '@/components/ui';
+import { Card, Badge, EmptyState, PageLoader } from '@/components/ui';
 import { getOrders, updateOrderStatus } from '@/services/orders';
 import { ORDER_STATUS_LABELS, ORDER_STATUS_COLORS, CURRENCY_FORMAT } from '@/lib/constants';
 import type { Order, OrderStatus } from '@/types';
@@ -74,8 +75,16 @@ export function OrdersPage() {
                         </span>
                       </div>
                       <p className="text-lg font-bold text-vertice-600">
-                        {CURRENCY_FORMAT.format(order.payment_amount)}
+                        {CURRENCY_FORMAT.format(order.total_price)}
                       </p>
+                      {order.quote && (
+                        <Link to={`/admin/cotizaciones/${order.quote.id}`} className="block text-xs text-gray-500 hover:text-vertice-700">
+                          Cotización #{order.quote.number}
+                        </Link>
+                      )}
+                      {order.payment_amount > 0 && (
+                        <p className="text-xs text-gray-500">Cobrado: {CURRENCY_FORMAT.format(order.payment_amount)}</p>
+                      )}
                       {order.notes && (
                         <p className="text-xs text-gray-500 line-clamp-2">{order.notes}</p>
                       )}

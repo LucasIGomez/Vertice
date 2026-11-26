@@ -33,7 +33,7 @@ export function Sidebar() {
       {/* Mobile toggle */}
       <button
         onClick={() => setMobileOpen(true)}
-        className="lg:hidden fixed top-4 left-4 z-50 p-2 bg-white rounded-lg shadow-md border border-gray-200"
+        className="print:hidden lg:hidden fixed top-4 left-4 z-50 p-2 bg-white rounded-lg shadow-md border border-gray-200"
         aria-label="Abrir menú"
       >
         <Menu className="h-5 w-5 text-gray-600" />
@@ -50,7 +50,7 @@ export function Sidebar() {
       {/* Sidebar */}
       <aside
         className={`
-          fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200
+          print:hidden fixed inset-y-0 left-0 z-50 w-64 bg-white border-r border-gray-200
           transform transition-transform duration-200 ease-in-out
           lg:translate-x-0 lg:static lg:z-auto
           ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}

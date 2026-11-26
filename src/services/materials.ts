@@ -51,10 +51,8 @@ export async function deleteMaterial(id: string) {
 }
 
 export async function getLowStockMaterials() {
-  const { data, error } = await supabase
-    .from('materials')
-    .select('*')
-    .filter('stock_quantity', 'lte', 'stock_min_alert');
+  // PostgREST no compara dos columnas entre sí: se filtra en el cliente
+  const { data, error } = await supabase.from('materials').select('*');
   if (error) throw error;
-  return data as Material[];
+  return (data as Material[]).filter(m => Number(m.stock_quantity) <= Number(m.stock_min_alert));
 }

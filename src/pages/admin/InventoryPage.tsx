@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react';
 import { Plus, Package, Pencil, Trash2, AlertTriangle } from 'lucide-react';
-import { Card, CardHeader, CardTitle, Button, Input, Select, Badge, EmptyState, PageLoader } from '@/components/ui';
+import { Card, CardTitle, Button, Input, Select, Badge, EmptyState, PageLoader } from '@/components/ui';
 import { getMaterials, createMaterial, updateMaterial, deleteMaterial } from '@/services/materials';
 import { MATERIAL_TYPE_LABELS } from '@/lib/constants';
 import type { Material, MaterialType } from '@/types';

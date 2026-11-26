@@ -7,6 +7,7 @@ import {
 } from 'lucide-react';
 import { Card, CardTitle, PageLoader } from '@/components/ui';
 import { supabase } from '@/lib/supabase';
+import { getLowStockMaterials } from '@/services/materials';
 import { CURRENCY_FORMAT, ORDER_STATUS_LABELS, ORDER_STATUS_COLORS } from '@/lib/constants';
 import { Badge } from '@/components/ui';
 
@@ -34,14 +35,11 @@ export function DashboardPage() {
         // Pedidos activos
         const { data: orders } = await supabase
           .from('orders')
-          .select('id, status, payment_amount, created_at, client:clients(name)')
+          .select('id, status, payment_amount, total_price, created_at, client:clients(name)')
           .order('created_at', { ascending: false });
 
         // Materiales con bajo stock
-        const { count: lowStock } = await supabase
-          .from('materials')
-          .select('*', { count: 'exact', head: true })
-          .lte('stock_quantity', 0); // se compara con stock_min_alert en RPC
+        const lowStock = (await getLowStockMaterials()).length;
 
         const allOrders = orders ?? [];
         const active = allOrders.filter(o =>
@@ -58,13 +56,13 @@ export function DashboardPage() {
           totalOrders: allOrders.length,
           activeOrders: active.length,
           monthRevenue,
-          lowStockCount: lowStock ?? 0,
+          lowStockCount: lowStock,
           recentOrders: allOrders.slice(0, 5).map(o => ({
             id: o.id,
             status: o.status,
-            client_name: (o.client as { name: string } | null)?.name ?? 'Sin cliente',
+            client_name: (o.client as unknown as { name: string } | null)?.name ?? 'Sin cliente',
             created_at: o.created_at,
-            total: o.payment_amount ?? 0,
+            total: o.total_price ?? 0,
           })),
         });
       } catch (err) {

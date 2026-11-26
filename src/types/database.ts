@@ -92,18 +92,21 @@ export interface QuoteItem {
   machine_id: string | null;
   estimated_time_minutes: number;  // tiempo estimado (cotización rápida)
   exact_time_minutes: number | null; // tiempo exacto (post-slicer)
-  material_grams: number | null;
+  material_grams: number | null;     // cantidad de material (gramos, ml o unidad del material)
+  labor_minutes: number;
   // Costos desglosados
   material_cost: number;
   electricity_cost: number;
   machine_wear_cost: number;
   labor_cost: number;
-  subtotal: number;
+  subtotal: number;                  // costo total del ítem (todas las unidades)
+  price: number;                     // precio de venta total del ítem (costo + margen)
   created_at: string;
 }
 
 export interface Quote {
   id: string;
+  number: number;
   client_id: string | null;
   status: QuoteStatus;
   items: QuoteItem[];         // join virtual
@@ -126,7 +129,8 @@ export interface Order {
   priority: number;           // 1=urgente, 2=normal, 3=baja
   assigned_machine_id: string | null;
   payment_status: 'pendiente' | 'parcial' | 'pagado';
-  payment_amount: number;
+  total_price: number;        // precio total del pedido
+  payment_amount: number;     // monto ya cobrado
   payment_link: string | null;
   delivery_date: string | null;
   notes: string | null;
@@ -163,8 +167,9 @@ export interface ExactCostParams {
   service_type: ServiceType;
   material_id: string;
   machine_id: string;
-  time_minutes: number;
-  material_grams: number;
+  time_minutes: number;     // tiempo de máquina por unidad
+  labor_minutes: number;    // tiempo de trabajo humano por unidad (setup, diseño, post-proceso)
+  material_amount: number;  // en gramos (kg), ml (litro) o la unidad del material (pliego, metro...)
   quantity: number;
   margin_percent: number;
 }

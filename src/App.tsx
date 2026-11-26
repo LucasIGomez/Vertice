@@ -7,6 +7,7 @@ import { ProtectedRoute } from '@/components/auth/ProtectedRoute';
 import { DashboardPage } from '@/pages/admin/DashboardPage';
 import { CalculatorPage } from '@/pages/admin/CalculatorPage';
 import { QuotesPage } from '@/pages/admin/QuotesPage';
+import { QuoteDetailPage } from '@/pages/admin/QuoteDetailPage';
 import { OrdersPage } from '@/pages/admin/OrdersPage';
 import { InventoryPage } from '@/pages/admin/InventoryPage';
 import { MachinesPage } from '@/pages/admin/MachinesPage';
@@ -45,6 +46,7 @@ export default function App() {
           <Route index element={<DashboardPage />} />
           <Route path="cotizador" element={<CalculatorPage />} />
           <Route path="cotizaciones" element={<QuotesPage />} />
+          <Route path="cotizaciones/:id" element={<QuoteDetailPage />} />
           <Route path="pedidos" element={<OrdersPage />} />
           <Route path="inventario" element={<InventoryPage />} />
           <Route path="maquinas" element={<MachinesPage />} />

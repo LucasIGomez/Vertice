@@ -104,6 +104,7 @@ CREATE TABLE quotes (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   client_id UUID REFERENCES clients(id) ON DELETE SET NULL,
   status quote_status NOT NULL DEFAULT 'borrador',
+  number SERIAL,
   total NUMERIC(12,2) NOT NULL DEFAULT 0,
   margin_percent NUMERIC(5,2) NOT NULL DEFAULT 40,
   final_price NUMERIC(12,2) NOT NULL DEFAULT 0,
@@ -123,6 +124,7 @@ CREATE TABLE quote_items (
   material_id UUID REFERENCES materials(id) ON DELETE SET NULL,
   machine_id UUID REFERENCES machines(id) ON DELETE SET NULL,
   estimated_time_minutes INTEGER NOT NULL DEFAULT 0,
+  labor_minutes INTEGER NOT NULL DEFAULT 0,
   exact_time_minutes INTEGER,
   material_grams NUMERIC(10,2),
   material_cost NUMERIC(12,2) NOT NULL DEFAULT 0,
@@ -130,6 +132,7 @@ CREATE TABLE quote_items (
   machine_wear_cost NUMERIC(12,2) NOT NULL DEFAULT 0,
   labor_cost NUMERIC(12,2) NOT NULL DEFAULT 0,
   subtotal NUMERIC(12,2) NOT NULL DEFAULT 0,
+  price NUMERIC(12,2) NOT NULL DEFAULT 0,
   created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
@@ -142,6 +145,7 @@ CREATE TABLE orders (
   priority INTEGER NOT NULL DEFAULT 2 CHECK (priority BETWEEN 1 AND 3),
   assigned_machine_id UUID REFERENCES machines(id) ON DELETE SET NULL,
   payment_status payment_status NOT NULL DEFAULT 'pendiente',
+  total_price NUMERIC(12,2) NOT NULL DEFAULT 0,
   payment_amount NUMERIC(12,2) NOT NULL DEFAULT 0,
   payment_link TEXT,
   delivery_date TIMESTAMPTZ,

@@ -1,88 +1,68 @@
 import type { CostBreakdown, Material, Machine, Settings, ExactCostParams } from '@/types';
-import { QUICK_ESTIMATE_CATEGORIES } from '@/lib/constants';
+
+/** Recargo sobre el costo de compra para cubrir repuestos (boquillas, PEI, correas...). 1.05 = +5%. */
+export const SPARE_PARTS_FACTOR = 1.05;
 
 /**
- * Calcula el desgaste de máquina por hora.
- * Fórmula Keitron: (costo_compra × 1.2 + mantenimiento_mensual × meses_vida) / vida_horas
+ * Desgaste de máquina por hora.
+ * Fórmula: (costo_compra × SPARE_PARTS_FACTOR + mantenimiento_mensual × meses_vida) / horas_para_recuperar
  */
-function machineWearPerHour(machine: Machine): number {
+export function machineWearPerHour(machine: Machine): number {
+  if (!machine.lifespan_hours) return 0;
   const monthsLife = machine.lifespan_hours / (8 * 22); // 8h/día, 22 días/mes
-  const totalCost = machine.purchase_cost * 1.2 + machine.maintenance_cost_monthly * monthsLife;
+  const totalCost = machine.purchase_cost * SPARE_PARTS_FACTOR + machine.maintenance_cost_monthly * monthsLife;
   return totalCost / machine.lifespan_hours;
 }
 
-/**
- * Costo de electricidad por hora.
- */
-function electricityCostPerHour(machine: Machine, settings: Settings): number {
+/** Costo de electricidad por hora de máquina. */
+export function electricityCostPerHour(machine: Machine, settings: Settings): number {
   return (machine.wattage / 1000) * settings.electricity_cost_kwh;
 }
 
 /**
- * Cotización rápida: estima costos basándose en categoría de tamaño.
+ * Cómo se carga la cantidad de material según la unidad con la que se compra.
+ * Filamento ($/kg) se carga en gramos; resina ($/litro) en ml; el resto
+ * (pliego, metro, unidad) se carga directamente en esa unidad (admite fracciones, ej. 0.25 pliego).
  */
-export function quickEstimate(
-  category: string,
-  material: Material,
-  machine: Machine,
-  settings: Settings,
-  quantity: number = 1,
-  marginPercent?: number,
-): CostBreakdown {
-  const cat = QUICK_ESTIMATE_CATEGORIES[category];
-  if (!cat) throw new Error(`Categoría desconocida: ${category}`);
-
-  return calculateCost({
-    service_type: machine.type === 'laser' ? 'grabado_laser' : 'impresion_3d',
-    material_id: material.id,
-    machine_id: machine.id,
-    time_minutes: cat.minutes,
-    material_grams: cat.grams,
-    quantity,
-    margin_percent: marginPercent ?? settings.default_margin_percent,
-  }, material, machine, settings);
+export function materialInputUnit(material: Material | null | undefined): { label: string; factor: number } {
+  const unit = (material?.unit_label ?? '').trim().toLowerCase();
+  if (unit === 'kg') return { label: 'gramos', factor: 1 / 1000 };
+  if (unit === 'l' || unit === 'litro' || unit === 'litros') return { label: 'ml', factor: 1 / 1000 };
+  return { label: unit || 'unidad', factor: 1 };
 }
 
 /**
- * Cotización exacta: usa datos del slicer o medición real.
+ * Calcula costo y precio sugerido de un trabajo.
+ * - Tiempo de máquina → electricidad + desgaste.
+ * - Tiempo de mano de obra (preparación, diseño, post-proceso) → mano de obra.
+ *   No se cobra mano de obra por todo el tiempo de impresión porque la máquina trabaja sola.
+ * - material = null → el cliente trae el objeto (ej. grabado sobre un mate).
  */
 export function calculateCost(
   params: ExactCostParams,
-  material: Material,
+  material: Material | null,
   machine: Machine,
   settings: Settings,
 ): CostBreakdown {
-  const hours = params.time_minutes / 60;
+  const machineHours = Math.max(0, params.time_minutes) / 60;
+  const laborHours = Math.max(0, params.labor_minutes) / 60;
+  const quantity = Math.max(1, params.quantity);
 
-  // Costo de material: gramos × (costo_unitario / 1000)
-  // unit_cost está en $/kg para filamento, $/litro para resina, etc.
-  const materialCost = params.material_grams
-    ? params.material_grams * (material.unit_cost / 1000)
+  const materialCost = material
+    ? Math.max(0, params.material_amount) * materialInputUnit(material).factor * material.unit_cost
     : 0;
+  const electricityCost = machineHours * electricityCostPerHour(machine, settings);
+  const machineWearCost = machineHours * machineWearPerHour(machine);
+  const laborCost = laborHours * settings.labor_cost_hour;
 
-  // Costo de electricidad
-  const electricityCost = hours * electricityCostPerHour(machine, settings);
-
-  // Desgaste de máquina
-  const machineWearCost = hours * machineWearPerHour(machine);
-
-  // Mano de obra (incluye tiempo de diseño/setup proporcional)
-  const laborCost = hours * settings.labor_cost_hour;
-
-  // Subtotal por unidad
-  const subtotalUnit = materialCost + electricityCost + machineWearCost + laborCost;
-
-  // Subtotal total
-  const subtotal = subtotalUnit * params.quantity;
-
-  // Margen
+  const subtotal = (materialCost + electricityCost + machineWearCost + laborCost) * quantity;
   const marginAmount = subtotal * (params.margin_percent / 100);
 
   return {
-    material: materialCost * params.quantity,
-    electricity: electricityCost * params.quantity,
-    machine_wear: machineWearCost * params.quantity,
-    labor: laborCost * params.quantity,
+    material: materialCost * quantity,
+    electricity: electricityCost * quantity,
+    machine_wear: machineWearCost * quantity,
+    labor: laborCost * quantity,
     subtotal,
     margin_percent: params.margin_percent,
     margin_amount: marginAmount,
