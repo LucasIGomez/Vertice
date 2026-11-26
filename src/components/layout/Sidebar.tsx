@@ -12,12 +12,14 @@ import {
   Menu,
   X,
   Triangle,
+  Tag,
 } from 'lucide-react';
 
 const navItems = [
   { to: '/admin', icon: LayoutDashboard, label: 'Dashboard', end: true },
   { to: '/admin/cotizador', icon: Calculator, label: 'Cotizador' },
   { to: '/admin/cotizaciones', icon: FileText, label: 'Cotizaciones' },
+  { to: '/admin/catalogo', icon: Tag, label: 'Catálogo láser' },
   { to: '/admin/pedidos', icon: ClipboardList, label: 'Pedidos' },
   { to: '/admin/inventario', icon: Package, label: 'Inventario' },
   { to: '/admin/maquinas', icon: Cpu, label: 'Máquinas' },

@@ -1,4 +1,4 @@
-import type { CostBreakdown, Material, Machine, Settings, ExactCostParams } from '@/types';
+import type { CostBreakdown, Material, Machine, Settings, ExactCostParams, Product } from '@/types';
 
 /** Recargo sobre el costo de compra para cubrir repuestos (boquillas, PEI, correas...). 1.05 = +5%. */
 export const SPARE_PARTS_FACTOR = 1.05;
@@ -68,4 +68,34 @@ export function calculateCost(
     margin_amount: marginAmount,
     total: subtotal + marginAmount,
   };
+}
+
+/**
+ * Costo de un juego del catálogo (tiempos y material son del juego completo)
+ * más los insumos extra (argollas, imanes, packaging).
+ */
+export function productSetCost(
+  product: Pick<Product, 'service_type' | 'time_minutes' | 'labor_minutes' | 'material_amount' | 'extra_cost'>,
+  material: Material | null,
+  machine: Machine,
+  settings: Settings,
+): CostBreakdown & { extra: number } {
+  const base = calculateCost(
+    {
+      service_type: product.service_type,
+      material_id: material?.id ?? '',
+      machine_id: machine.id,
+      time_minutes: product.time_minutes,
+      labor_minutes: product.labor_minutes,
+      material_amount: product.material_amount,
+      quantity: 1,
+      margin_percent: 0,
+    },
+    material,
+    machine,
+    settings,
+  );
+  const extra = Math.max(0, Number(product.extra_cost) || 0);
+  const subtotal = base.subtotal + extra;
+  return { ...base, extra, subtotal, margin_amount: 0, total: subtotal };
 }

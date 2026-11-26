@@ -173,3 +173,26 @@ export interface ExactCostParams {
   quantity: number;
   margin_percent: number;
 }
+
+// ── Catálogo ───────────────────────────────────
+
+/** Producto estándar con precio fijo. Los tiempos y el material son por juego completo. */
+export interface Product {
+  id: string;
+  name: string;
+  description: string | null;
+  category: string;
+  service_type: ServiceType;
+  machine_id: string | null;
+  material_id: string | null;
+  units_per_set: number;
+  time_minutes: number;
+  labor_minutes: number;
+  material_amount: number;
+  extra_cost: number;
+  price: number;
+  is_active: boolean;
+  notes: string | null;
+  created_at: string;
+  updated_at: string;
+}
