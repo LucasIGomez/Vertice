@@ -5,31 +5,11 @@ import { Card, Button, Badge, PageLoader } from '@/components/ui';
 import { getQuote, updateQuoteStatus, acceptQuote, deleteQuote, getOrderForQuote } from '@/services/quotes';
 import { getSettings } from '@/services/settings';
 import { CURRENCY_FORMAT, QUOTE_STATUS_LABELS, QUOTE_STATUS_COLORS } from '@/lib/constants';
+import { waLink } from '@/lib/whatsapp';
 import type { Order, Quote, Settings } from '@/types';
 
 function formatDate(iso: string | null) {
   return iso ? new Date(iso).toLocaleDateString('es-AR') : '—';
-}
-
-/**
- * Normaliza un teléfono argentino al formato internacional de WhatsApp (549 + área + número).
- * Acepta "351 15 123-4567", "0351 1234567", "+54 9 351 1234567", etc.
- */
-function toWhatsappNumber(raw: string | null | undefined): string {
-  let d = (raw ?? '').replace(/\D/g, '');
-  if (!d) return '';
-  if (d.startsWith('54')) {
-    d = d.slice(2);
-    if (d.startsWith('9')) d = d.slice(1);
-  }
-  if (d.startsWith('0')) d = d.slice(1);
-  // Quitar el "15" de celular que va después del código de área (2 a 4 dígitos)
-  if (d.length === 12) {
-    for (const areaLen of [2, 3, 4]) {
-      if (d.slice(areaLen, areaLen + 2) === '15') { d = d.slice(0, areaLen) + d.slice(areaLen + 2); break; }
-    }
-  }
-  return d.length === 10 ? `549${d}` : d;
 }
 
 function whatsappText(quote: Quote, settings: Settings | null) {
@@ -89,8 +69,7 @@ export function QuoteDetailPage() {
   if (!quote) return <p className="text-red-600">{error ?? 'No se encontró la cotización.'}</p>;
 
   const totalCost = quote.items.reduce((s, i) => s + Number(i.subtotal), 0);
-  const phone = toWhatsappNumber(quote.client?.phone);
-  const waUrl = `https://wa.me/${phone}?text=${encodeURIComponent(whatsappText(quote, settings))}`;
+  const waUrl = waLink(quote.client?.phone, whatsappText(quote, settings));
 
   function sendWhatsapp() {
     window.open(waUrl, '_blank', 'noopener');

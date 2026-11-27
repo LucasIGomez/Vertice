@@ -3,7 +3,7 @@
 ## Qué es Vértice
 Plataforma web para gestionar un negocio de impresión 3D y grabado láser. El dueño es Lucas, que opera desde Argentina con su socio. Tiene 3 impresoras 3D (Flashforge AD5X, Bambulab A1 combo, Anycubic Kobra S1 combo) y un láser (Atomstack A5 Pro V2).
 
-## Estado actual: Fase 1 COMPLETADA
+## Estado actual: Fases 1 y 2 completas · en producción en Vercel · integraciones Mercado Pago y WhatsApp hechas (ver README → Integraciones)
 Se hizo un rewrite completo desde cero en TypeScript. El código viejo era JSX sin tipos, con navegación por useState, todo en un solo archivo `supabase.js`. El nuevo proyecto tiene arquitectura modular, tipado estricto, y routing real.
 
 ## Stack técnico
@@ -12,7 +12,7 @@ Se hizo un rewrite completo desde cero en TypeScript. El código viejo era JSX s
 - **Routing**: React Router v7 (BrowserRouter)
 - **Backend**: Supabase (PostgreSQL + Auth + RLS)
 - **Iconos**: Lucide React
-- **Deploy**: Vercel (frontend) — pendiente configurar
+- **Deploy**: Vercel (frontend + funciones serverless en `api/`)
 - **Repo**: github.com/LucasIGomez/Vertice (branch `main`)
 - **Path aliases**: `@/` → `src/` (configurado en tsconfig.json y vite.config.ts)
 
@@ -186,13 +186,13 @@ El `.env` ya está en la carpeta con los valores reales.
 - [ ] Entidad Cotización completa: crear, editar, enviar al cliente, link compartible
 - [ ] Flujo cotización → pedido (al aceptar cotización, se crea pedido automáticamente)
 - [ ] Dashboard real: métricas de Supabase (ingresos, pedidos activos, materiales bajos)
-- [ ] Integración real Mercado Pago (SDK + Edge Functions de Supabase)
+- [x] Integración real Mercado Pago (Checkout Pro + webhook en funciones de Vercel: api/mp/*)
 - [ ] Upload de archivos STL/imágenes a Supabase Storage
 
 ### Fase 3 — Panel Público + Integraciones
 - [ ] Catálogo público con precios estimados
 - [ ] Formulario de contacto/cotización público
-- [ ] WhatsApp Business API (notificaciones automáticas de estado)
+- [x] WhatsApp Business API (notificaciones automáticas de estado y pagos: api/whatsapp/*, api/_lib/whatsapp.js)
 - [ ] Alertas de stock reales (email/WhatsApp cuando material baja del mínimo)
 
 ### Fase 4 — SaaS + Marketing

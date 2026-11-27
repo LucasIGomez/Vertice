@@ -18,6 +18,7 @@ import { SettingsPage } from '@/pages/admin/SettingsPage';
 // Public pages
 import { HomePage } from '@/pages/public/HomePage';
 import { CatalogPage } from '@/pages/public/CatalogPage';
+import { PaymentResultPage } from '@/pages/public/PaymentResultPage';
 
 // Auth pages
 import { LoginPage } from '@/pages/auth/LoginPage';
@@ -30,6 +31,7 @@ export default function App() {
         <Route element={<PublicLayout />}>
           <Route index element={<HomePage />} />
           <Route path="catalogo" element={<CatalogPage />} />
+          <Route path="pago" element={<PaymentResultPage />} />
         </Route>
 
         {/* Login */}

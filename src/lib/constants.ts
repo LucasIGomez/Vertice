@@ -26,6 +26,18 @@ export const ORDER_STATUS_COLORS: Record<string, string> = {
   cancelado: 'bg-red-100 text-red-700',
 };
 
+export const PAYMENT_STATUS_LABELS: Record<string, string> = {
+  pendiente: 'Sin pagar',
+  parcial: 'Seña pagada',
+  pagado: 'Pagado',
+};
+
+export const PAYMENT_STATUS_COLORS: Record<string, string> = {
+  pendiente: 'bg-gray-100 text-gray-600',
+  parcial: 'bg-sky-100 text-sky-700',
+  pagado: 'bg-green-100 text-green-700',
+};
+
 export const QUOTE_STATUS_LABELS: Record<string, string> = {
   borrador: 'Borrador',
   enviada: 'Enviada',
